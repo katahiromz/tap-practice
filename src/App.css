@@ -1,4 +1,8 @@
 /* App.css */
+* {
+  /* 要素タップ時のハイライトを無効化 */
+  -webkit-tap-highlight-color: transparent; /* iOS/Android Chrome */
+}
 body {
   margin: 0;
   padding: 0;

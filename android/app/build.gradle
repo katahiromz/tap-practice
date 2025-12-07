@@ -9,7 +9,6 @@ android {
     defaultConfig {
         applicationId "com.katahiromz.tap_practice"
         minSdkVersion 28
-        //noinspection OldTargetApi
         targetSdkVersion 35
         versionCode 100
         versionName "1.0.0"
@@ -19,9 +18,9 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles = [ getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' ]
         }
     }
     bundle {
@@ -39,9 +38,9 @@ android {
     lintOptions {
         disable "Instantiatable"
     }
-    namespace 'com.katahiromz.tap_practice'
+    namespace = 'com.katahiromz.tap_practice'
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 }
 
