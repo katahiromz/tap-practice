@@ -21,7 +21,7 @@
     <style name="Theme.TapPractice.Splash" parent="Theme.SplashScreen.IconBackground">
         <item name="windowSplashScreenBackground">@color/themeColor</item>
         <!-- <item name="windowSplashScreenIconBackgroundColor">@color/themeColor</item> -->
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
         <!-- <item name="windowSplashScreenAnimationDuration">0</item> -->
         <item name="postSplashScreenTheme">@style/Theme.TapPractice</item>
         <!-- Navigation bar color. -->
