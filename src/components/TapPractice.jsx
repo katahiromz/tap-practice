@@ -1,13 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // アプリケーションのベースパスを取得
 const BASE_URL = import.meta.env.BASE_URL;
-
-// サウンドファイルをインポート
-const successSound = new Audio(`${BASE_URL}success.mp3`); // 「タップ成功」
-const outsideSound = new Audio(`${BASE_URL}outside.mp3`); // 「外れているよ～」
-const shakingSound = new Audio(`${BASE_URL}shaking.mp3`); // 「ぶれてるよ～」
-const tooLongSound = new Audio(`${BASE_URL}too-long.mp3`); // 「長すぎだよ～」
 
 const MAX_TOUCH_TIME = 500; // タップと見なす最大時間（ミリ秒）
 const MAX_MOVE_DISTANCE = 10; // タップと見なす最大のぶれ距離（ピクセル）
@@ -103,6 +97,20 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
   const dragRef = useRef({
     isDragging: false,
   });
+
+  // === Audioインスタンスを保持するRef ===
+  const successSoundRef = useRef(null);
+  const outsideSoundRef = useRef(null);
+  const shakingSoundRef = useRef(null);
+  const tooLongSoundRef = useRef(null);
+
+  // === Audioインスタンスを初回のみ生成 ===
+  useEffect(() => {
+    successSoundRef.current = new Audio(`${BASE_URL}success.mp3`);
+    outsideSoundRef.current = new Audio(`${BASE_URL}outside.mp3`);
+    shakingSoundRef.current = new Audio(`${BASE_URL}shaking.mp3`);
+    tooLongSoundRef.current = new Audio(`${BASE_URL}too-long.mp3`);
+  }, []);
 
   // タッチサポートの検出（SSRセーフ）
   const isTouchSupported = typeof window !== 'undefined' && 'ontouchstart' in window;
@@ -206,7 +214,7 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
 
     // 1. ボタン外のタップをチェック
     if (!isButtonArea) {
-      outsideSound.play().catch(e => console.error("音声再生エラー:", e));
+      outsideSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
       // 外側タップは即座に失敗確定
       setFeedback({ message: ERROR_MESSAGE_00, isSuccess: false });
       timeoutRef.current = setTimeout(() => {
@@ -247,13 +255,13 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
 
     switch (type) {
     case '成功':
-      successSound.play().catch(e => console.error("音声再生エラー:", e));
+      successSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
       break;
     case '長すぎ':
-      tooLongSound.play().catch(e => console.error("音声再生エラー:", e));
+      tooLongSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
       break;
     case 'ぶれ':
-      shakingSound.play().catch(e => console.error("音声再生エラー:", e));
+      shakingSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
       break;
     }
 
