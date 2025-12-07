@@ -36,7 +36,7 @@ function ResultScreen({ successCount, failCount, totalTaps, onRestart }) {
         </table>
       </div>
 
-      <button onClick={onRestart} className="restart-button">
+      <button onClick={onRestart} className="restart-button" aria-label="もう一度練習する（最初から練習をやり直します）">
         <span className="nobr">もう</span>
         <span className="nobr">一度</span>
         <span className="nobr">練習</span>

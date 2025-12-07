@@ -107,7 +107,7 @@ function App() {
       }}
     >
       <h1>
-        <span><img className="main-icon" src={mainIconUrl} /></span><br />
+        <span><img className="main-icon" src={mainIconUrl} alt="おばあちゃんのタップ練習アプリのアイコン" /></span><br />
         <span className="nobr">おばあちゃんの</span>
         <span className="nobr">タップ練習</span>
       </h1>
@@ -130,7 +130,7 @@ function App() {
         <span className="nobr">して</span>
         <span className="nobr">ください。</span>
       </p>
-      <button onClick={startPractice} className="start-button">
+      <button onClick={startPractice} className="start-button" aria-label="練習を始める（全7回のタップ練習を開始します）">
         <span className="nobr">練習を</span>
         <span className="nobr">始める</span>
         <span className="nobr">(全 {MAX_TAPS} 回)</span>
