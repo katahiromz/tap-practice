@@ -482,6 +482,7 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
     private fun initWebViewClient() {
         // WebViewAssetLoaderを設定する。
         val assetLoader = WebViewAssetLoader.Builder()
+            .setDomain("appassets.androidplatform.net")
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
@@ -566,6 +567,8 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         settings.javaScriptEnabled = true // JavaScriptを有効化。
         settings.domStorageEnabled = true // localStorageを有効化。
         settings.mediaPlaybackRequiresUserGesture = false // ジェスチャーなくてもメディア反応可。
+        settings.allowFileAccess = false // ファイルアクセスを無効化（WebViewAssetLoaderを使用）。
+        settings.allowContentAccess = false // コンテンツアクセスを無効化。
         if (BuildConfig.DEBUG) {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE // デバッグ中はキャッシュしない。
             WebView.setWebContentsDebuggingEnabled(true) // デバッギングを有効にする。
