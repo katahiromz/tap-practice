@@ -9,7 +9,14 @@ const IS_PRODUCTION = import.meta.env.MODE === 'production';
 const BASE_URL = import.meta.env.BASE_URL;
 
 const MAX_TAPS = 7;
-const startSound = new Audio(`${BASE_URL}start.mp3`); // 「タップ練習しようね」
+
+// メインアイコン
+const mainIconUrl = `${BASE_URL}main-icon.png`;
+const mainIcon = new Image(mainIconUrl);
+
+// 「タップ練習しようね」
+const startSoundUrl = `${BASE_URL}start.mp3`;
+const startSound = new Audio(startSoundUrl);
 
 const rootClass = IS_PRODUCTION ? 'app-container initial-screen disable-select' : 'app-container initial-screen';
 
@@ -21,7 +28,8 @@ function App() {
     isPracticeActive: false, // 練習中か？
   });
 
-  const startRef = useRef(new Audio(`${BASE_URL}start.mp3`));
+  const mainIconRef = useRef(new Image(mainIconUrl));
+  const startRef = useRef(new Audio(startSoundUrl));
 
   const startPractice = () => {
     startSound.play().catch(e => console.error("音声再生エラー:", e));
@@ -93,7 +101,7 @@ function App() {
       }}
     >
       <h1>
-        <span className="large">👵</span><br />
+        <span><img className="main-icon" src={mainIconUrl} /></span><br />
         <span className="nobr">おばあちゃんの</span>
         <span className="nobr">タップ練習</span>
       </h1>

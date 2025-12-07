@@ -221,3 +221,8 @@ button:active {
   -moz-user-select: none;    /* Firefox */
   -ms-user-select: none;     /* IE/Edge */
 }
+
+.main-icon {
+  width: calc((4vh + 4vw));
+  height: calc((4vh + 4vw));
+}
