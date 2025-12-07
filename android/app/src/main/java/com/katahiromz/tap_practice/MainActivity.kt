@@ -568,10 +568,6 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         // JavaScript側からGenericAppのバージョン情報を取得できるようにする。
         val versionName = getVersionName()
         settings.userAgentString += "/TapPractice/Android/$versionName/"
-
-        // XHR/Fetchで file:// スキームを使用する場合には必須
-        settings.allowFileAccessFromFileURLs = true
-        settings.allowUniversalAccessFromFileURLs = true
     }
 
     // バージョン名を取得する。
