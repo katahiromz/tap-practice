@@ -14,6 +14,10 @@ class MyWebViewClient(
     private val listener: Listener,
     private val assetLoader: WebViewAssetLoader
 ) : WebViewClient() {
+    companion object {
+        private const val ASSET_LOADER_DOMAIN = "https://appassets.androidplatform.net/"
+    }
+
     // リスナー。
     interface Listener {
         fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?)
@@ -38,8 +42,8 @@ class MyWebViewClient(
         // WebViewAssetLoaderを使用するため、appassets.androidplatform.netドメインのURLを許可する。
         if (view != null && request != null) {
             val url: String = request.url.toString()
-            // appassets.androidplatform.net ドメインまたはローカルアセットのURLの場合は許可
-            if (url.startsWith("https://appassets.androidplatform.net/")) {
+            // WebViewAssetLoaderドメインのURLの場合は許可
+            if (url.startsWith(ASSET_LOADER_DOMAIN)) {
                 return false // WebViewが処理するように false を返す
             }
         }
