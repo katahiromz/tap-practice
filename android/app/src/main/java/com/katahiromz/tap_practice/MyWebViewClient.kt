@@ -8,8 +8,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.webkit.WebViewAssetLoader
 
-class MyWebViewClient(private val listener: Listener) : WebViewClient() {
+class MyWebViewClient(
+    private val listener: Listener,
+    private val assetLoader: WebViewAssetLoader
+) : WebViewClient() {
     // リスナー。
     interface Listener {
         fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?)
@@ -18,21 +22,28 @@ class MyWebViewClient(private val listener: Listener) : WebViewClient() {
         fun onPageFinished(view: WebView?, url: String?)
     }
 
+    // リソースリクエストをインターセプトしてWebViewAssetLoaderを使って処理する。
+    override fun shouldInterceptRequest(
+        view: WebView,
+        request: WebResourceRequest
+    ): WebResourceResponse? {
+        return assetLoader.shouldInterceptRequest(request.url)
+    }
+
     // 読み込み可能なURLを制限したり、フックする。
     override fun shouldOverrideUrlLoading(
         view: WebView?,
         request: WebResourceRequest?
     ): Boolean {
+        // WebViewAssetLoaderを使用するため、appassets.androidplatform.netドメインのURLを許可する。
         if (view != null && request != null) {
-            // アセット内部に制限する。
             val url: String = request.url.toString()
-            val index:Int = url.indexOf("file:///android_asset/tap-practice/")
-            if (index == 0) {
-                view.loadUrl(url)
-                return true
+            // appassets.androidplatform.net ドメインまたはローカルアセットのURLの場合は許可
+            if (url.startsWith("https://appassets.androidplatform.net/")) {
+                return false // WebViewが処理するように false を返す
             }
         }
-        return true
+        return true // その他のURLは外部ブラウザなどで処理
     }
 
     // ウェブビューからのエラーをリスナーに渡す。

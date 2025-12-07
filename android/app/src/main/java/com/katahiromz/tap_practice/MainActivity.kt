@@ -25,6 +25,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.ProgressBar
+import androidx.webkit.WebViewAssetLoader
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -479,6 +480,11 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
 
     // ウェブビュー クライアントを初期化する。
     private fun initWebViewClient() {
+        // WebViewAssetLoaderを設定する。
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+
         webView?.webViewClient = MyWebViewClient(object : MyWebViewClient.Listener {
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?,
                                          error: WebResourceError?) {
@@ -495,7 +501,7 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
                 Timber.i("onPageFinished")
                 findViewById<TextView>(R.id.loading).visibility = View.GONE
             }
-        })
+        }, assetLoader)
     }
 
     // クロームクライアントを初期化する。
