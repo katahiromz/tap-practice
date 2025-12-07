@@ -344,13 +344,14 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
         }}
         disabled={isFeedbacking}
         className="tap-button"
+        aria-label="タップ練習ボタン（指一本で素早くタップしてください）"
       >
         <span className="nobr">ここを</span>
         <span className="nobr">タップ！</span>
       </button>
 
       <div className="controls">
-        <button className="reset-button">
+        <button className="reset-button" aria-label="練習を終了して最初の画面に戻る">
           最初に戻る/終了
         </button>
       </div>
