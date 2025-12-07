@@ -12,25 +12,7 @@ const tooLongSound = new Audio(`${BASE_URL}too-long.mp3`); // 「長すぎだよ
 const MAX_TOUCH_TIME = 500; // タップと見なす最大時間（ミリ秒）
 const MAX_MOVE_DISTANCE = 10; // タップと見なす最大のぶれ距離（ピクセル）
 
-// === 判定に必要な状態を保持するRef ===
-// ReactのStateではなく、再レンダリングを伴わないRefでタッチ情報を保持します。
-const touchState = {
-  startX: 0,
-  startY: 0,
-  startTime: 0,
-  touchCount: 0,
-};
-// === ドラッグ/スワイプ判定に必要な状態を保持するRef ===
-const dragState = {
-  isDragging: false,
-};
 
-const isTouchSupported = 'ontouchstart' in window;
-if (isTouchSupported) {
-  console.log("このブラウザはタッチをサポートしています。");
-} else {
-  console.log("このブラウザはタッチをサポートしていません。");
-}
 
 // 失敗原因のメッセージリスト
 const ERROR_MESSAGE_00 = (
@@ -102,86 +84,6 @@ const ERROR_MESSAGE_03 = (
   </span>
 );
 
-/**
- * タップの判定ロジック
- * @param {object} event - タッチイベントオブジェクト
- * @param {string} eventName - イベント名 ('onTouchStart', 'onTouchEnd', 'onMouseDown', 'onMouseUp')
- * @param {Array | null} changedTouches - マウスイベントの場合にclientX/Yを格納したモック配列
- * @returns {[boolean, React.ReactNode]} - [成功/失敗, メッセージ]
- */
-const tapCheck = (event, eventName, changedTouches) => {
-  let touches;
-  const isStartEvent = eventName === 'onTouchStart' || eventName === 'onMouseDown';
-  const isEndEvent = eventName === 'onTouchEnd' || eventName === 'onMouseUp';
-
-  if (eventName === 'onTouchEnd') {
-      // onTouchEnd では、指が離れた情報 (changedTouches) を使用します。
-      touches = event.changedTouches; 
-  } else {
-      // onTouchStart では、画面に触れている情報 (touches) を使用します。
-      // onMouseDown/Up では、モックされた情報 (changedTouches) を使用します。
-      touches = event.touches || changedTouches;
-  }
-
-  if (!touches || touches.length === 0) return [null, null]; // タッチ情報がない場合はここで終了
-
-  // 1. 指の数のチェック
-  if (isStartEvent) {
-    if (eventName === 'onMouseDown') {
-      touchState.touchCount = 1; 
-    } else {
-      touchState.touchCount = event.touches.length;
-      // 複数指チェック
-      if (touchState.touchCount > 1) {
-        // 既に複数指で始まった場合は、即座に失敗判定を出す
-        return [false, '指の数', ERROR_MESSAGE_01];
-      }
-    }
-  }
-
-  if (isStartEvent) {
-    // 座標と時間を記録
-    const touch = touches[0];
-    touchState.startX = touch.clientX;
-    touchState.startY = touch.clientY;
-    touchState.startTime = Date.now();
-    return [null, null]; // 判定はせず、情報のみ記録
-  } else if (isEndEvent) {
-    const touch = touches[0];
-
-    const endX = touch.clientX;
-    const endY = touch.clientY;
-    const endTime = Date.now();
-
-    // 距離と時間の計算
-    const dx = endX - touchState.startX;
-    const dy = endY - touchState.startY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const duration = endTime - touchState.startTime;
-
-    // 2. 接触時間のチェック
-    if (duration > MAX_TOUCH_TIME) {
-      return [false, '長すぎ', ERROR_MESSAGE_03]; 
-    }
-    
-    // 3. 移動距離（ぶれ）のチェック
-    if (distance > MAX_MOVE_DISTANCE) {
-      return [false, 'ぶれ', ERROR_MESSAGE_02]; 
-    }
-
-    // 4. 全てOK -> 成功
-    return [true, '成功',
-      <span>
-        <span className="nobr">タップ</span>
-        <span className="nobr">成功！</span>
-      </span>
-    ];
-  }
-  
-  // touchmoveやその他のイベントはここで無視
-  return [null, null]; 
-};
-
 function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
   const [feedback, setFeedback] = useState({
     message: null,
@@ -189,10 +91,101 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
   });
   const timeoutRef = useRef(null);
 
-  const successRef = useRef(new Audio(`${BASE_URL}success.mp3`));
-  const outsideRef = useRef(new Audio(`${BASE_URL}outside.mp3`));
-  const shakingRef = useRef(new Audio(`${BASE_URL}shaking.mp3`));
-  const tooLongRef = useRef(new Audio(`${BASE_URL}too-long.mp3`));
+  // === 判定に必要な状態を保持するRef ===
+  // ReactのStateではなく、再レンダリングを伴わないRefでタッチ情報を保持します。
+  const touchRef = useRef({
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    touchCount: 0,
+  });
+  // === ドラッグ/スワイプ判定に必要な状態を保持するRef ===
+  const dragRef = useRef({
+    isDragging: false,
+  });
+
+  // タッチサポートの検出（SSRセーフ）
+  const isTouchSupported = typeof window !== 'undefined' && 'ontouchstart' in window;
+
+  /**
+   * タップの判定ロジック
+   * @param {object} event - タッチイベントオブジェクト
+   * @param {string} eventName - イベント名 ('onTouchStart', 'onTouchEnd', 'onMouseDown', 'onMouseUp')
+   * @param {Array | null} changedTouches - マウスイベントの場合にclientX/Yを格納したモック配列
+   * @returns {[boolean, React.ReactNode]} - [成功/失敗, メッセージ]
+   */
+  const tapCheck = (event, eventName, changedTouches) => {
+    let touches;
+    const isStartEvent = eventName === 'onTouchStart' || eventName === 'onMouseDown';
+    const isEndEvent = eventName === 'onTouchEnd' || eventName === 'onMouseUp';
+
+    if (eventName === 'onTouchEnd') {
+        // onTouchEnd では、指が離れた情報 (changedTouches) を使用します。
+        touches = event.changedTouches; 
+    } else {
+        // onTouchStart では、画面に触れている情報 (touches) を使用します。
+        // onMouseDown/Up では、モックされた情報 (changedTouches) を使用します。
+        touches = event.touches || changedTouches;
+    }
+
+    if (!touches || touches.length === 0) return [null, null]; // タッチ情報がない場合はここで終了
+
+    // 1. 指の数のチェック
+    if (isStartEvent) {
+      if (eventName === 'onMouseDown') {
+        touchRef.current.touchCount = 1; 
+      } else {
+        touchRef.current.touchCount = event.touches.length;
+        // 複数指チェック
+        if (touchRef.current.touchCount > 1) {
+          // 既に複数指で始まった場合は、即座に失敗判定を出す
+          return [false, '指の数', ERROR_MESSAGE_01];
+        }
+      }
+    }
+
+    if (isStartEvent) {
+      // 座標と時間を記録
+      const touch = touches[0];
+      touchRef.current.startX = touch.clientX;
+      touchRef.current.startY = touch.clientY;
+      touchRef.current.startTime = Date.now();
+      return [null, null]; // 判定はせず、情報のみ記録
+    } else if (isEndEvent) {
+      const touch = touches[0];
+
+      const endX = touch.clientX;
+      const endY = touch.clientY;
+      const endTime = Date.now();
+
+      // 距離と時間の計算
+      const dx = endX - touchRef.current.startX;
+      const dy = endY - touchRef.current.startY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const duration = endTime - touchRef.current.startTime;
+
+      // 2. 接触時間のチェック
+      if (duration > MAX_TOUCH_TIME) {
+        return [false, '長すぎ', ERROR_MESSAGE_03]; 
+      }
+      
+      // 3. 移動距離（ぶれ）のチェック
+      if (distance > MAX_MOVE_DISTANCE) {
+        return [false, 'ぶれ', ERROR_MESSAGE_02]; 
+      }
+
+      // 4. 全てOK -> 成功
+      return [true, '成功',
+        <span>
+          <span className="nobr">タップ</span>
+          <span className="nobr">成功！</span>
+        </span>
+      ];
+    }
+    
+    // touchmoveやその他のイベントはここで無視
+    return [null, null]; 
+  };
 
   // フィードバック画面をリセット
   const resetFeedback = () => {
@@ -237,11 +230,11 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
     const [isSuccess, type, message] = tapCheck(event, eventName, changedTouches);
 
     if (eventName === 'onMouseDown') {
-      dragState.isDragging = true;
+      dragRef.current.isDragging = true;
     }
 
     if (eventName === 'onMouseUp') {
-      dragState.isDragging = false;
+      dragRef.current.isDragging = false;
     }
 
     // 判定が不要なイベント（例：touchstart, touchmove）はここで終了
@@ -303,7 +296,7 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
         if (event.target.closest('.tap-button')) {
           return;
         }
-        if (dragState.isDragging) {
+        if (dragRef.current.isDragging) {
           handleTapEvent(event, true, isTouchSupported ? 'onTouchEnd' : 'onMouseUp');
         } else {
           handleTapEvent(event, false, 'onClick');

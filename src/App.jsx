@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import TapPractice from './components/TapPractice.jsx';
 import ResultScreen from './components/ResultScreen.jsx';
 import './App.css';
@@ -12,11 +12,9 @@ const MAX_TAPS = 7;
 
 // メインアイコン
 const mainIconUrl = `${BASE_URL}main-icon.png`;
-const mainIcon = new Image(mainIconUrl);
 
 // 「タップ練習しようね」
 const startSoundUrl = `${BASE_URL}start.mp3`;
-const startSound = new Audio(startSoundUrl);
 
 const rootClass = IS_PRODUCTION ? 'app-container initial-screen disable-select' : 'app-container initial-screen';
 
@@ -28,11 +26,19 @@ function App() {
     isPracticeActive: false, // 練習中か？
   });
 
-  const mainIconRef = useRef(new Image(mainIconUrl));
-  const startRef = useRef(new Audio(startSoundUrl));
+  const mainIconRef = useRef(null);
+  const startRef = useRef(null);
+
+  // メディアの初期化を副作用として実行
+  useEffect(() => {
+    const img = new Image();
+    img.src = mainIconUrl;
+    mainIconRef.current = img;
+    startRef.current = new Audio(startSoundUrl);
+  }, []);
 
   const startPractice = () => {
-    startSound.play().catch(e => console.error("音声再生エラー:", e));
+    startRef.current?.play().catch(e => console.error("音声再生エラー:", e));
     setSession({
       currentTaps: 0,
       successCount: 0,
