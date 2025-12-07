@@ -35,7 +35,7 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
     // ローカライズされた文字列を取得する。
     // 複数の翻訳版に対応するため、特別に処理を用意した。
     private fun getLocString(resId: Int): String {
-        return activity!!.getLocString(resId)
+        return activity?.getLocString(resId) ?: ""
     }
 
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -85,7 +85,7 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
     // GenericAppの設定をクリアする。
     @JavascriptInterface
     fun clearSettings() {
-        MainRepository.clearMessageList(activity!!)
+        activity?.let { MainRepository.clearMessageList(it) }
     }
 
     // 振動を開始する。
@@ -154,7 +154,7 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
             }
         }
         Locale.setDefault(locale)
-        activity!!.setCurLocale(locale)
+        activity?.setCurLocale(locale)
     }
 
     private var modalDialog: AlertDialog? = null
@@ -167,9 +167,13 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
         result: JsResult?
     ): Boolean {
         // MaterialAlertDialogを使用して普通に実装する。
+        val currentActivity = activity ?: run {
+            result?.cancel()
+            return false
+        }
         val title = getLocString(R.string.app_name)
         val okText = getLocString(R.string.ok)
-        modalDialog = MaterialAlertDialogBuilder(activity!!, R.style.AlertDialogTheme)
+        modalDialog = MaterialAlertDialogBuilder(currentActivity, R.style.AlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(okText) { _, _ ->
@@ -190,10 +194,14 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
         result: JsResult?
     ): Boolean {
         // MaterialAlertDialogを使用して普通に実装する。
+        val currentActivity = activity ?: run {
+            result?.cancel()
+            return false
+        }
         val title = getLocString(R.string.app_name)
         val okText = getLocString(R.string.ok)
         val cancelText = getLocString(R.string.cancel)
-        modalDialog = MaterialAlertDialogBuilder(activity!!, R.style.AlertDialogTheme)
+        modalDialog = MaterialAlertDialogBuilder(currentActivity, R.style.AlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(okText) { _, _ ->
@@ -218,16 +226,20 @@ class MyWebChromeClient(private var activity: MainActivity?, private val listene
         defaultValue: String?,
         result: JsPromptResult?
     ): Boolean {
-        activity!!.currLocaleContext = null
+        val currentActivity = activity ?: run {
+            result?.cancel()
+            return false
+        }
+        currentActivity.currLocaleContext = null
         val title = getLocString(R.string.app_name)
 
         // MaterialAlertDialogを使用して普通に実装する。
         val okText = getLocString(R.string.ok)
         val cancelText = getLocString(R.string.cancel)
-        val input = EditText(activity!!)
+        val input = EditText(currentActivity)
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setText(if (defaultValue != null) defaultValue else "")
-        modalDialog = MaterialAlertDialogBuilder(activity!!, R.style.AlertDialogTheme)
+        modalDialog = MaterialAlertDialogBuilder(currentActivity, R.style.AlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
             .setView(input)

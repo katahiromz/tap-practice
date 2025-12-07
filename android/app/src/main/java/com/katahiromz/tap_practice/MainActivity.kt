@@ -553,7 +553,7 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         currentWebView.webChromeClient = chromeClient
 
         // JavaScript側からメソッドを呼び出せるインターフェイスを提供する。
-        currentWebView.addJavascriptInterface(chromeClient!!, "android")
+        chromeClient?.let { currentWebView.addJavascriptInterface(it, "android") }
 
         // URLを指定してウェブページを読み込む。
         val url = getLocString(R.string.url)
@@ -596,9 +596,7 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         } else {
             pm.getPackageInfo(appName, PackageManager.GET_META_DATA)
         }
-        if (pi.versionName != null)
-            return pi.versionName!!
-        return "(unknown version)"
+        return pi.versionName ?: "(unknown version)"
     }
 
     // endregion
@@ -616,10 +614,12 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
 
         // TextToSpeechにもロケールをセットする。
         if (isSpeechReady && tts != null) {
-            if (tts!!.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
-                tts!!.language = locale
-            } else {
-                Timber.w("Locale $locale not available for TTS.")
+            tts?.let { textToSpeech ->
+                if (textToSpeech.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
+                    textToSpeech.language = locale
+                } else {
+                    Timber.w("Locale $locale not available for TTS.")
+                }
             }
         } else {
             // TTSが準備できていない場合は、onInitで再度ロケール設定を試みるか、
@@ -633,7 +633,7 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         if (currLocaleContext == null) {
             currLocaleContext = applicationContext.createLocalizedContext(locale)
         }
-        return currLocaleContext!!.getString(id)
+        return currLocaleContext?.getString(id) ?: ""
     }
     fun getLocString(id: Int): String {
         return getLocString(id, currLocale)
