@@ -490,16 +490,18 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?,
                                          error: WebResourceError?) {
                 val description = error?.description?.toString()
-                Timber.i("onReceivedError: %s", description)
+                val url = request?.url?.toString()
+                Timber.e("onReceivedError: %s for URL: %s", description, url)
             }
 
             override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?,
                                              errorResponse: WebResourceResponse?) {
-                Timber.i("onReceivedHttpError")
+                val url = request?.url?.toString()
+                Timber.e("onReceivedHttpError for URL: %s", url)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
-                Timber.i("onPageFinished")
+                Timber.i("onPageFinished: %s", url)
                 findViewById<TextView>(R.id.loading).visibility = View.GONE
             }
         }, assetLoader)
@@ -552,7 +554,9 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         currentWebView.addJavascriptInterface(chromeClient!!, "android")
 
         // URLを指定してウェブページを読み込む。
-        currentWebView.loadUrl(getLocString(R.string.url))
+        val url = getLocString(R.string.url)
+        Timber.i("Loading URL: %s", url)
+        currentWebView.loadUrl(url)
     }
 
     // ウェブ設定を初期化する。
@@ -567,8 +571,10 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
         settings.javaScriptEnabled = true // JavaScriptを有効化。
         settings.domStorageEnabled = true // localStorageを有効化。
         settings.mediaPlaybackRequiresUserGesture = false // ジェスチャーなくてもメディア反応可。
-        settings.allowFileAccess = false // ファイルアクセスを無効化（WebViewAssetLoaderを使用）。
-        settings.allowContentAccess = false // コンテンツアクセスを無効化。
+        // WebViewAssetLoaderを使用する場合でも、内部的にassetsにアクセスする必要があるため
+        // allowFileAccessは有効のままにする（ただしfile://スキームの直接使用はしない）
+        settings.allowFileAccess = true
+        settings.allowContentAccess = false // コンテンツアクセスは無効化。
         if (BuildConfig.DEBUG) {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE // デバッグ中はキャッシュしない。
             WebView.setWebContentsDebuggingEnabled(true) // デバッギングを有効にする。

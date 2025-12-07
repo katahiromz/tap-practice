@@ -31,7 +31,11 @@ class MyWebViewClient(
         view: WebView,
         request: WebResourceRequest
     ): WebResourceResponse? {
-        return assetLoader.shouldInterceptRequest(request.url)
+        val response = assetLoader.shouldInterceptRequest(request.url)
+        if (response != null) {
+            android.util.Log.d("MyWebViewClient", "Intercepted: ${request.url}")
+        }
+        return response
     }
 
     // 読み込み可能なURLを制限したり、フックする。
