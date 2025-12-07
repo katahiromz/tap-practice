@@ -19,5 +19,5 @@
     <string name="now_starting">タップ練習を起動中...</string>
 
     <!-- URLs -->
-    <string name="url">https://appassets.androidplatform.net/assets/tap-practice/index.html</string>
+    <string name="url">https://appassets.androidplatform.net/tap-practice/index.html</string>
 </resources>

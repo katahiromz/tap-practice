@@ -481,9 +481,11 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
     // ウェブビュー クライアントを初期化する。
     private fun initWebViewClient() {
         // WebViewAssetLoaderを設定する。
+        // ルートパス"/"をassetsフォルダにマップすることで、
+        // /tap-practice/... のパスが assets/tap-practice/... として解決される
         val assetLoader = WebViewAssetLoader.Builder()
             .setDomain("appassets.androidplatform.net")
-            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
         webView?.webViewClient = MyWebViewClient(object : MyWebViewClient.Listener {
