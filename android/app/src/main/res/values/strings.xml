@@ -11,10 +11,10 @@
     <string name="cant_use_camera">This app cannot use the camera without permission.</string>
 
     <!-- main -->
-    <string name="app_name">タップ練習</string>
+    <string name="app_name">Tap Practice</string>
     <string name="web_view">WebView</string>
     <string name="progress_bar">ProgressBar</string>
-    <string name="now_starting">タップ練習を起動中...</string>
+    <string name="now_starting">Loading Tap Practice...</string>
 
     <!-- URLs -->
     <string name="url">https://appassets.androidplatform.net/tap-practice/index.html</string>
