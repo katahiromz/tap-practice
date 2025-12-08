@@ -366,8 +366,13 @@ class MainActivity : AppCompatActivity(), ValueCallback<String>, TextToSpeech.On
     // 「戻る」ボタンをサポートするコールバック関数。
     private val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            // 'go_back' メッセージを投函する。おそらく'message'イベントリスナが受け取るはず。
-            webView?.evaluateJavascript("postMessage('go_back');") { }
+            Timber.i("handleOnBackPressed")
+            if (false) {
+                // 'go_back' メッセージを投函する。おそらく'message'イベントリスナが受け取るはず。
+                webView?.evaluateJavascript("postMessage('go_back');") { }
+            }
+            // 軽く閉じる（完全には閉じたいなら代わりにfinishAndRemoveTaskを使う）
+            finish();
         }
     }
 
