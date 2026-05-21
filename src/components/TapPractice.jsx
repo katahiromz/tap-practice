@@ -6,8 +6,6 @@ const BASE_URL = import.meta.env.BASE_URL;
 const MAX_TOUCH_TIME = 500; // タップと見なす最大時間（ミリ秒）
 const MAX_MOVE_DISTANCE = 10; // タップと見なす最大のぶれ距離（ピクセル）
 
-
-
 // 失敗原因のメッセージリスト
 const ERROR_MESSAGE_00 = (
   <span>
@@ -78,7 +76,7 @@ const ERROR_MESSAGE_03 = (
   </span>
 );
 
-function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
+function TapPractice({ onTapResult, currentTapNumber, maxTaps, currentSuccessCount, onEnd }) {
   const [feedback, setFeedback] = useState({
     message: null,
     isSuccess: null, // null: 初期状態, true: 成功, false: 失敗
@@ -100,6 +98,7 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
 
   // === Audioインスタンスを保持するRef ===
   const successSoundRef = useRef(null);
+  const applauseSoundRef = useRef(null);
   const outsideSoundRef = useRef(null);
   const shakingSoundRef = useRef(null);
   const tooLongSoundRef = useRef(null);
@@ -107,6 +106,7 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
   // === Audioインスタンスを初回のみ生成 ===
   useEffect(() => {
     successSoundRef.current = new Audio(`${BASE_URL}success.mp3`);
+    applauseSoundRef.current = new Audio(`${BASE_URL}applause.mp3`);
     outsideSoundRef.current = new Audio(`${BASE_URL}outside.mp3`);
     shakingSoundRef.current = new Audio(`${BASE_URL}shaking.mp3`);
     tooLongSoundRef.current = new Audio(`${BASE_URL}too-long.mp3`);
@@ -255,6 +255,11 @@ function TapPractice({ onTapResult, currentTapNumber, maxTaps, onEnd }) {
 
     switch (type) {
     case '成功':
+      const isPerfectNow = (currentTapNumber === maxTaps) && (currentSuccessCount + 1 === maxTaps);
+      if (isPerfectNow) {
+        // 全問成功なら拍手を鳴らす！
+        applauseSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
+      }
       successSoundRef.current?.play().catch(e => console.error("音声再生エラー:", e));
       break;
     case '長すぎ':

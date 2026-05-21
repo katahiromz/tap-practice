@@ -72,6 +72,9 @@ function App() {
     });
   };
 
+  // 全てのタップが成功したかどうかの判定フラグ
+  const isPerfectScore = session.successCount === MAX_TAPS;
+
   if (!session.isPracticeActive && session.currentTaps > 0) {
     // {MAX_TAPS}回終了後の結果画面
     return (
@@ -80,6 +83,7 @@ function App() {
         failCount={session.failCount}
         totalTaps={MAX_TAPS}
         onRestart={startPractice}
+        isPerfect={isPerfectScore} // ★ 全問成功フラグを渡す
       />
     );
   }
@@ -91,6 +95,7 @@ function App() {
         onTapResult={handleTapResult}
         currentTapNumber={session.currentTaps + 1}
         maxTaps={MAX_TAPS}
+        currentSuccessCount={session.successCount} // ★ 現在の成功数を渡す
         onEnd={endPractice} // 「終了して最初に戻る」ボタン用
       />
     );
